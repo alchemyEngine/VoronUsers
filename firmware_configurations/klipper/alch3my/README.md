@@ -1,5 +1,5 @@
 # LCD Chamber Temperature
-This guide details the Klipper modifications I used to display a chamber temperature readout on your graphical LCD screen.
+This guide details the Klipper modifications I used to display a chamber temperature readout on a graphical LCD screen.
 
 ![](images/modified_display_layout.jpg)
 

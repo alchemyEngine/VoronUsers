@@ -1,52 +1,20 @@
 # LCD Chamber Temperature
-This guide details the Klipper modifications I used to display a chamber temperature readout on your graphical LCD screen.
+This guide walks you through modifying the Klipper LCD layout in order to display chamber temperature as below:
 
 ![](images/modified_display_layout.jpg)
 
-### Notes
-* All modified files are included in full in the `/modded_files` for refence/context only
-* The bitmap image used to generate the chamber icon can be found in the `/images` folder
-* **PLEASE** backup all of the files modified in this guide before saving any changes!
-* Thanks to **aMpeX** for helping me figure this out
+Major thanks to **aMpeX** for putting in the Klipper PR to make this so easy!
 
-## 1. Define the chamber glyph/icon
-Here you tell Klipper what you want the `chamber` icon to look like.
-Make the following modifications to the `klipper\klippy\extras\display\icons.py` file
-1) Define the `chamber_icon` array. Insert the following after the `feedrate_icon` array:
-```py
-chamber_icon = [
-    0b1111111111111111,
-    0b1000011111000011,
-    0b1000011111000011,
-    0b1000011111000011,
-    0b1000011111000011,
-    0b1000000000000011,
-    0b1000001110000011,
-    0b1011111111111011,
-    0b1000001110000011,
-    0b1000000100000011,
-    0b1000000000000011,
-    0b1000000000000011,
-    0b1011111111111011,
-    0b1000100000100011,
-    0b1000000000000011,
-    0b1111111111111111
- ]
- ```
-2) Add the `chamber_icon` array to the `Icons16x16` dictionary at the end of the file, like so:
-```py
-Icons16x16 = {
-    'extruder': extruder_icon,
-    'bed': bed_icon, 'bed_heat1': bed_heat1_icon, 'bed_heat2': bed_heat2_icon,
-    'fan': fan1_icon, 'fan1': fan1_icon, 'fan2': fan2_icon,
-    'feedrate': feedrate_icon,
-    'chamber': chamber_icon,
-}
-```
-3) Save changes
+## **INSTRUCTIONS**
+**FIRST** Update Klipper. This guide relies on features merged on *June 8, 2020*.
 
-## 2. Define the chamber temperature probe
-There are several ways to do this. I don't have mine linked to an exhaust fan, etc, so mine looks like this. 
+## 0. [Optional] Create a new `.cfg` file for all things LCD-related
+While you can skip this step, creating purpose-oriented `.cfg` files allows you to keep all related configuration items, macros, etc. in one easy to find place and keeps your `printer.cfg` from becoming cluttered and unwieldly.
+1) Create a new file called `lcd_tweaks.cfg` in the same directory as `printer.cfg`
+2) Link this file to your configuration by adding `[include lcd_tweaks.cfg]` to `printer.cfg`
+
+## 1. Define the chamber temperature probe
+There are several ways to do this. I don't have mine linked to an exhaust fan, etc, so mine looks like this. Most importantly, note the full name of this config section, we will need it to create the new chamber temperature display field.
 
 In `printer.cfg`:
 ```ini
@@ -57,8 +25,34 @@ min_temp: 0
 max_temp: 100
 gcode_id: C
 ```
-## 3. Define the display layout/fields
-1) Define the `display_data` group by adding the following to your `printer.cfg`, or defining it in a linked file:
+
+## 2. Define the chamber glyph/icon
+Here you tell Klipper what you want the `chamber` icon to look like. Multiple custom glyphs/icons can be defined this way.
+
+Add the following section to `lcd_tweaks.cfg`:
+```py
+[display_glyph chamber]
+data:
+    1111111111111111
+    1000010001000011
+    1000010001000011
+    1000010001000011
+    1000011111000011
+    1000000000000011
+    1000000000000011
+    1000001110000011
+    1011101010111011
+    1000001110000011
+    1000000100000011
+    1000000000000011
+    1000000000000011
+    1011111111111011
+    1000100000100011
+    1111111111111111
+ ```
+
+## 3. Define the display layout and data fields
+Define the custom 'Voron' `display_data` group by adding the following to your `lcd_tweaks.cfg`:
 ```ini
 [display_template _vheater_temperature]
 param_heater_name: "extruder"
@@ -68,7 +62,8 @@ text:
     # Show glyph
     {% if param_heater_name == "heater_bed" %}
       {% if heater.target %}
-        ~animated_bed~
+        {% set frame = (printer.toolhead.estimated_print_time|int % 2) + 1 %}
+        ~bed_heat{frame}~
       {% else %}
         ~bed~
       {% endif %}
@@ -94,7 +89,12 @@ position: 0, 10
 text:
   {% if 'fan' in printer %}
     {% set speed = printer.fan.speed %}
-      ~fan~
+    {% if speed %}
+      {% set frame = (printer.toolhead.estimated_print_time|int % 2) + 1 %}
+      ~fan{frame}~
+    {% else %}
+      ~fan1~
+    {% endif %}
     { "{:>4.0%}".format(speed) }
   {% endif %}
 
@@ -128,6 +128,15 @@ text:
     { "%6s" % (msg,) }
   {% endif %}
 
+# This section defines the actual chamber temp. field
+[display_data __voron_display chamber]
+position: 2, 0
+text:
+  {% set chamber = printer['temperature_sensor chamber'] %}
+	~chamber~
+	{ "%3.0f" % (chamber.temperature,) }
+	~degrees~
+
 [display_data __voron_display print_status]
 position: 3, 0
 text: 
@@ -137,27 +146,17 @@ text:
     {% set pos = printer.toolhead.position %}
     { "X%-4.0fY%-4.0fZ%-5.2f" % (pos.x, pos.y, pos.z) }
   {% else %}
-    Ready
+	  Ready
   {% endif %}
   ```
 
-  The next bit defines the chamber temp. display section. Be sure to change `temperature_sensor chamber` to whatever your sensor was actually defined as in Section 1 (keep the quotation marks!). Throw this in with the above once you've confirmed that:
-  ```ini
-  [display_data __voron_display chamber]
-position: 2, 0
-text:
-  {% set chamber = printer['temperature_sensor chamber'] %}
-	~chamber~
-	{ "%3.0f" % (chamber.temperature,) }
-	~degrees~
-```
-2) Tell Klipper you want to use the group we just defined by adding the following line your `[Display]` section in `printer.cfg`:
+**NB**: If you've defined your chamber temperature probe differently `'temperature_sensor chamber'` if  (keep the quotation marks!).
+
+Tell Klipper you want to use the group we just defined by adding the following setting to your `[Display]` section in `printer.cfg`:
 ```
 display_group: __voron_display
 ```
-3) Save the changes you've made to `printer.cfg`.
-
-4) Restart the Klipper service from the SSH terminal: `sudo service klipper restart`
+Lastly, save the changes you've made to `printer.cfg` and `lcd_tweaks.cfg` and perform a firmware restart.
 
 ## DONE!
 God-willing, after all that, you should see your chamber temp on the display :)

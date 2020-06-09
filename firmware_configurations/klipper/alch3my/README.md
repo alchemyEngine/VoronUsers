@@ -33,7 +33,7 @@ Add the following section to `lcd_tweaks.cfg`:
 ```py
 [display_glyph chamber]
 data:
-	0000000000000000
+    0000000000000000
     1111111111111111
     1000010000100001
     1000010000100001

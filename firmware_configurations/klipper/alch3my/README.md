@@ -142,7 +142,7 @@ text:
   {% endif %}
   ```
 
-**NB**: If you've defined your chamber temperature probe differently `'temperature_sensor chamber'` if  (keep the quotation marks!).
+**NB**: If you've defined your chamber temperature probe as something than `'temperature_sensor chamber'`, be sure to update it in the commented section above  (keep the quotation marks!).
 
 Tell Klipper you want to use the group we just defined by adding the following setting to your `[Display]` section in `printer.cfg`:
 ```

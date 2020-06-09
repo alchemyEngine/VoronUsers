@@ -33,22 +33,22 @@ Add the following section to `lcd_tweaks.cfg`:
 ```py
 [display_glyph chamber]
 data:
+	0000000000000000
     1111111111111111
-    1000010001000011
-    1000010001000011
-    1000010001000011
-    1000011111000011
-    1000000000000011
-    1000000000000011
-    1000001110000011
-    1011101010111011
-    1000001110000011
-    1000000100000011
-    1000000000000011
-    1000000000000011
-    1011111111111011
-    1000100000100011
+    1000010000100001
+    1000010000100001
+    1000011111100001
+    1000000000000001
+    1000000000000001
+    1000001111000001
+    1011101001011101
+    1000001111000001
+    1000000110000001
+    1000000000000001
+    1011111111111101
+    1000100000010001
     1111111111111111
+    0000000000000000
  ```
 
 ## 3. Define the display layout and data fields
@@ -118,15 +118,7 @@ text:
 position: 2, 10
 text:
   {% set ptime = printer.idle_timeout.printing_time %}
-  {% set progress = printer.display_status.progress %}
-  {% if progress >= 0.05 and ptime % 12 >= 6 %}
-    # Periodically show time remaining
-    {% set rtime = (ptime / progress) - ptime %}
-    { "-%02d:%02d" % (rtime // (60 * 60), (rtime // 60) % 60) }
-  {% else %}
-    {% set msg = "%02d:%02d" % (ptime // (60 * 60), (ptime // 60) % 60) %}
-    { "%6s" % (msg,) }
-  {% endif %}
+  { "%02d:%02d" % (ptime // (60 * 60), (ptime // 60) % 60) }
 
 # This section defines the actual chamber temp. field
 [display_data __voron_display chamber]

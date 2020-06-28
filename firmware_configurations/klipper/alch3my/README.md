@@ -150,5 +150,12 @@ display_group: __voron_display
 ```
 Lastly, save the changes you've made to `printer.cfg` and `lcd_tweaks.cfg` and perform a firmware restart.
 
+## 4. [Optional] Enable Chamber Temp. Display in OctoPrint
+To show the chamber temperature on the temperature plot in OctoPrint:
+
+In `Octoprint Settings` -> `Printer Profiles` -> `Edit Profile` (pencil icon) -> `Print bed & build volume`, tick the `Heated Chamber` box.
+![](images/octoprint_chamber_setting.PNG)
+![](images/octoprint_temp_plot.PNG)
+
 ## DONE!
 God-willing, after all that, you should see your chamber temp on the display :)

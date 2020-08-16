@@ -170,7 +170,7 @@ text:
   ```
 
 **IMPORTANT NOTE**
-Regarding the use of `temperature_fan`: You'll need to replace `['temperature_sensor chamber']` in the 2nd-to-last section above with `[tempaure_fan chamber]`, or whatever you've actually defined that section config section as. Likewise if you've named your sensor anything other than 'chamber'.
+Regarding the use of `temperature_fan`: You'll need to replace `['temperature_sensor chamber']` in the 2nd-to-last section above with `['tempaure_fan chamber']`, or whatever you've actually defined that section config section as. Likewise if you've named your sensor anything other than 'chamber'.
 
 Tell Klipper you want to use the group we just defined by adding the following setting to your `[Display]` section in `printer.cfg`:
 ```

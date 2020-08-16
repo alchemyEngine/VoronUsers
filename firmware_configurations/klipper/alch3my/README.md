@@ -14,7 +14,7 @@ While you can skip this step, creating purpose-oriented `.cfg` files allows you 
 2) Link this file to your configuration by adding `[include lcd_tweaks.cfg]` to `printer.cfg`
 
 ## 1. Define the chamber temperature probe
-There are several ways to do this. I don't have mine linked to an exhaust fan, etc, so mine looks like this. Most importantly, note the full name of this config section, we will need it to create the new chamber temperature display field.
+There are several ways to do this. I don't have mine linked to an exhaust fan, etc, so mine looks like this. 
 
 In `printer.cfg`:
 ```ini
@@ -25,9 +25,10 @@ min_temp: 0
 max_temp: 100
 gcode_id: C
 ```
+If you've already defined a chamber sensor, or a temperature fan linked to the chamber, make note of the full configuration section name.
 
 ## 2. Define the chamber glyph/icon
-Here you tell Klipper what you want the `chamber` icon to look like. Multiple custom glyphs/icons can be defined this way.
+Here you tell Klipper what you want the `chamber` icon to look like.
 
 Add the following section to `lcd_tweaks.cfg`:
 ```py
@@ -49,6 +50,27 @@ data:
     1000100000010001
     1111111111111111
     0000000000000000
+ ```
+ Multiple custom glyphs/icons can be defined this way. We'll also define the Voron logo glyph for the serial status display line:
+ ```py
+[display_glyph voron]
+data:
+    0000001110000000
+    0000111111100000
+    0001111111110000
+    0111111111111100
+    1111100111001110
+    1111001110011110
+    1110011100111110
+    1100111001111110
+    1111110011100110
+    1111100111001110
+    1111001110011110
+    1110011100111110
+    0111111111111100
+    0001111111110000
+    0000111111100000
+    0000001110000000
  ```
 
 ## 3. Define the display layout and data fields
@@ -120,7 +142,10 @@ text:
   {% set ptime = printer.idle_timeout.printing_time %}
   { "%02d:%02d" % (ptime // (60 * 60), (ptime // 60) % 60) }
 
-# This section defines the actual chamber temp. field
+#########################################################
+# This section defines the actual chamber temp. field,
+# replace 'temperature_sensor chamber' as necessary
+#########################################################
 [display_data __voron_display chamber]
 position: 2, 0
 text:
@@ -137,12 +162,15 @@ text:
   {% elif printer.idle_timeout.printing_time or printer.gcode.busy %}
     {% set pos = printer.toolhead.position %}
     { "X%-4.0fY%-4.0fZ%-5.2f" % (pos.x, pos.y, pos.z) }
+  # This next else statement is optional, use for Voron serial bling as in the title image
   {% else %}
-	  Ready
+	  { "VX.xxx " }
+	  ~voron~
   {% endif %}
   ```
 
-**NB**: If you've defined your chamber temperature probe as something than `'temperature_sensor chamber'`, be sure to update it in the commented section above  (keep the quotation marks!).
+**IMPORTANT NOTE**
+Regarding the use of `temperature_fan`: You'll need to replace `['temperature_sensor chamber']` in the 2nd-to-last section above with `[tempaure_fan chamber]`, or whatever you've actually defined that section config section as. Likewise if you've named your sensor anything other than 'chamber'.
 
 Tell Klipper you want to use the group we just defined by adding the following setting to your `[Display]` section in `printer.cfg`:
 ```

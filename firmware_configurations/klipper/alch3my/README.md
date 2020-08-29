@@ -40,7 +40,7 @@ data:
     *....*....*....*
     *....******....*
     *..............*
-	*..............*
+    *..............*
     *.....****.....*
     *.***.*..*.***.*
     *.....****.....*
@@ -49,7 +49,7 @@ data:
     *.************.*
     *...*......*...*
     ****************
-	................
+    ................
  ```
  Multiple custom glyphs/icons can be defined this way. We'll also define the Voron logo glyph for the serial status display line:
  ```py
